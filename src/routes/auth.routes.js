@@ -1,6 +1,6 @@
 const {Router} = require("express");
 const router=  Router();
-const {registerUserController}= require("../controller/auth.controller.js");
+const {registerUserController, loginUserController}= require("../controller/auth.controller.js");
 
 /**
  * @route POST /api/auth/register
@@ -8,5 +8,5 @@ const {registerUserController}= require("../controller/auth.controller.js");
  * @access Public
  */
 router.post("/register", registerUserController)
-
+router.post("/login", loginUserController)
 module.exports= router;

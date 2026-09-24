@@ -50,4 +50,39 @@ async function registerUserController(req, res) {
     })
 }
 
-module.exports= {registerUserController}
+
+/**
+ * @name loginUserController
+ * @description Controller to handle user login
+ * @requires email and password
+ * @returns {Object} - The logged in user object
+ */
+async function loginUserController(req, res){
+    const {email, password}= req.body;
+    const user= await userModel.findOne({email});
+    if(!user){
+        return res.status(400).json({message: "User with this email does not exist"});
+    }
+
+    const isPasswordValid= await bcrypt.compare(password, user.password);
+    if(!isPasswordValid){
+        return res.status(400).json({message: "Invalid password"});
+    }
+
+    const token= jwt.sign(
+        {user: user._id, username: user.username},
+        process.env.JWT_SECRET,
+        { expiresIn: "4h"}
+    )
+
+    res.cookie("token", token)
+    res.status(200).json({
+        message: "User logged in successfully",
+        user:{
+            id:user._id,
+            username: user.username,
+            email: user.email
+        }
+    })
+}
+module.exports= {registerUserController, loginUserController}
