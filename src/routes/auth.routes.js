@@ -8,5 +8,11 @@ const {registerUserController, loginUserController}= require("../controller/auth
  * @access Public
  */
 router.post("/register", registerUserController)
+
+/**
+ * @route POST /api/auth/login
+ * @description Login a user using email and password
+ * @access Public
+ */
 router.post("/login", loginUserController)
 module.exports= router;
