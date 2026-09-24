@@ -1,7 +1,7 @@
 const {Router} = require("express");
 const router=  Router();
-const {registerUserController, loginUserController}= require("../controller/auth.controller.js");
-
+const {registerUserController, loginUserController, logoutUserController, getMeController}= require("../controllers/auth.controller.js");
+const {authMiddleware}= require("../middlewares/auth.middleware.js");
 /**
  * @route POST /api/auth/register
  * @description Register a new user
@@ -15,4 +15,20 @@ router.post("/register", registerUserController)
  * @access Public
  */
 router.post("/login", loginUserController)
+
+
+/**
+ * @route POST /api/auth/logout
+ * @description Logout a user by clearing the user cookie and blacklisting the token
+ * @access Public
+ */
+router.post("/logout", logoutUserController)
+
+
+/**
+ * @route GET /api/auth/get-me
+ * @description Get current logged-in user details using the token from the cookie
+ * @access private
+ */
+router.get("/get-me", authMiddleware, getMeController)
 module.exports= router;

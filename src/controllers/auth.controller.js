@@ -1,6 +1,9 @@
 const userModel= require("../models/user.model.js");
 const jwt= require("jsonwebtoken")
 const bcrypt= require("bcrypt")
+const tokenBlacklistModel= require("../models/blacklist.model.js")
+
+
 /**
  * @name registerUserController
  * @description Controller to handle user registration
@@ -35,7 +38,7 @@ async function registerUserController(req, res) {
     })
 
     const token= jwt.sign(
-        {user: user._id, username: user.username},
+        {id: user._id, username: user.username},
         process.env.JWT_SECRET,
         { expiresIn: "4h"}
     )
@@ -70,7 +73,7 @@ async function loginUserController(req, res){
     }
 
     const token= jwt.sign(
-        {user: user._id, username: user.username},
+        {id: user._id, username: user.username},
         process.env.JWT_SECRET,
         { expiresIn: "4h"}
     )
@@ -85,4 +88,41 @@ async function loginUserController(req, res){
         }
     })
 }
-module.exports= {registerUserController, loginUserController}
+
+
+/**
+ * @name logoutUserController
+ * @description Controller to handle user logout, by clearing the user cookie and blacklisting the token
+ * @requires token
+ * @returns message - User logged out successfully
+ */
+async function logoutUserController(req, res){
+    const token= req.cookies.token;
+    if(token){
+        await tokenBlacklistModel.create({token});
+    }
+    res.clearCookie("token");
+
+    res.status(200).json({message: "User logged out successfully"});
+}
+
+
+/**
+ * @name getMeController
+ * @description gets the current loggedin user details
+ * @requires decoded token
+ * @returns message - User logged out successfully
+ */
+ async function getMeController(req, res){
+    const user= await userModel.findById(req.user.id)
+    res.status(200).json({
+        message: "User details fetched successfully",
+        user:{
+            id: user._id,
+            username: user.username,
+            email: user.email
+        }
+    })
+ }
+
+module.exports= {registerUserController, loginUserController, logoutUserController, getMeController}
